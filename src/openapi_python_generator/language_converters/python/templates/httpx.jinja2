@@ -1,33 +1,33 @@
 {%  if async_client %}async {% endif %}def {{ operation_id }}({{ params }} api_config_override : Optional[APIConfig] = None) -> {% if return_type.type is none or return_type.type.converted_type is none %}None{% else %}{{ return_type.type.converted_type}}{% endif %}:
-    api_config = api_config_override if api_config_override else APIConfig()
+    _api_config = api_config_override if api_config_override else APIConfig()
 
-    base_path = api_config.base_path
-    path = f'{{ path_name }}'
-    headers: httpx._types.HeaderTypes = {
+    _base_path = _api_config.base_path
+    _path = f'{{ path_name }}'
+    _headers: httpx._types.HeaderTypes = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': f'Bearer { api_config.get_access_token() }',
         {{ header_params | join(',\n') | safe }}
     }
-    query_params : Dict[str,Any] = {
+    _query_params : Dict[str,Any] = {
     {% if query_params|length > 0 %}
         {{ query_params | join(',\n') | safe }}
     {% endif %}
     }
 
-    query_params = {key:value for (key,value) in query_params.items() if value is not None}
+    _query_params = {key:value for (key,value) in query_params.items() if value is not None}
 
     {% if async_client %}
-async with httpx.AsyncClient(base_url=base_path, verify=api_config.verify) as client:
-        response = await client.request(
+async with httpx.AsyncClient(base_url=_base_path, verify=_api_config.verify) as _client:
+        response = await _client.request(
     {% else %}
-with httpx.Client(base_url=base_path, verify=api_config.verify) as client:
-        response = client.request(
+with httpx.Client(base_url=_base_path, verify=_api_config.verify) as _client:
+        response = _client.request(
     {% endif %}
         '{{ method }}',
         httpx.URL(path),
-        headers=headers,
-        params=query_params,
+        headers=_headers,
+        params=_query_params,
         {% if body_param %}
         {% if use_orjson %}
         content=orjson.dumps({{ body_param }})
