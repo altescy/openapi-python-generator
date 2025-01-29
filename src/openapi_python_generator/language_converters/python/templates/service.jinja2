@@ -6,6 +6,21 @@ import pydantic
 import orjson
 {% endif %}
 
+T = TypeVar("T")
+
+if pydantic.__version__ < "2":
+
+    class TypeAdapter(Generic[T]):
+        def __init__(self, type: Type[T]) -> None:
+            self._type = type
+
+        def validate_python(self, object: Any) -> T:
+            return pydantic.parse_obj_as(self._type, object)
+
+else:
+    from pydantic import TypeAdapter
+
+
 from ..models import *
 from ..api_config import APIConfig, HTTPException
 
