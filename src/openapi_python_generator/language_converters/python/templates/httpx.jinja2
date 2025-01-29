@@ -3,7 +3,7 @@
 
     base_path = api_config.base_path
     path = f'{{ path_name }}'
-    headers = {
+    headers: httpx._types.HeaderTypes = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': f'Bearer { api_config.get_access_token() }',
