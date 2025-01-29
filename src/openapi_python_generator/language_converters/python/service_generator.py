@@ -7,7 +7,14 @@ from typing import Tuple
 from typing import Union
 
 import click
-from openapi_pydantic.v3.v3_0 import Reference, Schema, Operation, Parameter, RequestBody, Response, MediaType, PathItem
+from openapi_pydantic.v3.v3_0 import MediaType
+from openapi_pydantic.v3.v3_0 import Operation
+from openapi_pydantic.v3.v3_0 import Parameter
+from openapi_pydantic.v3.v3_0 import PathItem
+from openapi_pydantic.v3.v3_0 import Reference
+from openapi_pydantic.v3.v3_0 import RequestBody
+from openapi_pydantic.v3.v3_0 import Response
+from openapi_pydantic.v3.v3_0 import Schema
 
 from openapi_python_generator.language_converters.python import common
 from openapi_python_generator.language_converters.python.common import normalize_symbol
@@ -173,7 +180,17 @@ def _generate_params(
     for param in operation.parameters:
         if isinstance(param, Parameter) and param.param_in == param_in:
             param_name_cleaned = common.normalize_symbol(param.name)
-            params.append(f"{param.name!r} : {param_name_cleaned}")
+            if param_in == "query":
+                params.append(f"{param.name!r} : {param_name_cleaned}")
+            else:
+                params.append(
+                    "**("
+                    + "{"
+                    + f"{param.name!r} : {param_name_cleaned}"
+                    + "}"
+                    + f" if {param_name_cleaned} is not None else dict()"
+                    + ")"
+                )
 
     return params
 
