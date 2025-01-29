@@ -8,17 +8,16 @@ import orjson
 
 T = TypeVar("T")
 
-if pydantic.__version__ < "2":
+if pydantic.__version__ >= "2":
+    from pydantic import TypeAdapter
+else:
 
-    class TypeAdapter(Generic[T]):
+    class TypeAdapter(Generic[T]):  # type: ignore[no-redef]
         def __init__(self, type: Type[T]) -> None:
             self._type = type
 
         def validate_python(self, object: Any) -> T:
             return pydantic.parse_obj_as(self._type, object)
-
-else:
-    from pydantic import TypeAdapter
 
 
 from ..models import *
