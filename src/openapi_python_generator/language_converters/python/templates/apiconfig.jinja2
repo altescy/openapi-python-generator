@@ -21,7 +21,7 @@ class APIConfig(BaseModel):
         return self.access_token
 {% endif %}
 
-    def set_access_token(self, value : str):
+    def set_access_token(self, value : str) -> None:
 {% if env_token_name is not none %}
         raise Exception("This client was generated with an environment variable for the access token. Please set the environment variable '{{ env_token_name }}' to the access token.")
 {% else %}
@@ -34,5 +34,5 @@ class HTTPException(Exception):
         self.message = message
         super().__init__(f"{status_code} {message}")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.status_code} {self.message}"
