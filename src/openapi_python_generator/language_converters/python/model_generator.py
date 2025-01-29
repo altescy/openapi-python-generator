@@ -4,15 +4,20 @@ from typing import List
 from typing import Optional
 
 import click
-from openapi_pydantic.v3.v3_0 import Schema, Reference, Components
+from openapi_pydantic.v3.v3_0 import Components
+from openapi_pydantic.v3.v3_0 import Reference
+from openapi_pydantic.v3.v3_0 import Schema
 
 from openapi_python_generator.common import PydanticVersion
 from openapi_python_generator.language_converters.python import common
 from openapi_python_generator.language_converters.python.jinja_config import (
-    ENUM_TEMPLATE, MODELS_TEMPLATE_PYDANTIC_V2,
+    ENUM_TEMPLATE,
 )
 from openapi_python_generator.language_converters.python.jinja_config import (
     MODELS_TEMPLATE,
+)
+from openapi_python_generator.language_converters.python.jinja_config import (
+    MODELS_TEMPLATE_PYDANTIC_V2,
 )
 from openapi_python_generator.language_converters.python.jinja_config import (
     create_jinja_env,
@@ -23,9 +28,9 @@ from openapi_python_generator.models import TypeConversion
 
 
 def type_converter(  # noqa: C901
-        schema: Schema,
-        required: bool = False,
-        model_name: Optional[str] = None,
+    schema: Schema,
+    required: bool = False,
+    model_name: Optional[str] = None,
 ) -> TypeConversion:
     """
     Converts an OpenAPI type to a Python type.
@@ -70,13 +75,13 @@ def type_converter(  # noqa: C901
                     )
 
         original_type = (
-                "tuple<" + ",".join([i.original_type for i in conversions]) + ">"
+            "tuple<" + ",".join([i.original_type for i in conversions]) + ">"
         )
         if len(conversions) == 1:
             converted_type = conversions[0].converted_type
         else:
             converted_type = (
-                    "Tuple[" + ",".join([i.converted_type for i in conversions]) + "]"
+                "Tuple[" + ",".join([i.converted_type for i in conversions]) + "]"
             )
 
         converted_type = pre_type + converted_type + post_type
@@ -102,14 +107,14 @@ def type_converter(  # noqa: C901
                     )
                 )
         original_type = (
-                "union<" + ",".join([i.original_type for i in conversions]) + ">"
+            "union<" + ",".join([i.original_type for i in conversions]) + ">"
         )
 
         if len(conversions) == 1:
             converted_type = conversions[0].converted_type
         else:
             converted_type = (
-                    "Union[" + ",".join([i.converted_type for i in conversions]) + "]"
+                "Union[" + ",".join([i.converted_type for i in conversions]) + "]"
             )
 
         converted_type = pre_type + converted_type + post_type
@@ -121,13 +126,13 @@ def type_converter(  # noqa: C901
     # We only want to auto convert to datetime if orjson is used throghout the code, otherwise we can not
     # serialize it to JSON.
     elif schema.type == "string" and (
-            schema.schema_format is None or not common.get_use_orjson()
+        schema.schema_format is None or not common.get_use_orjson()
     ):
         converted_type = pre_type + "str" + post_type
     elif (
-            schema.type == "string"
-            and schema.schema_format.startswith("uuid")
-            and common.get_use_orjson()
+        schema.type == "string"
+        and schema.schema_format.startswith("uuid")
+        and common.get_use_orjson()
     ):
         if len(schema.schema_format) > 4 and schema.schema_format[4].isnumeric():
             uuid_type = schema.schema_format.upper()
@@ -139,6 +144,8 @@ def type_converter(  # noqa: C901
     elif schema.type == "string" and schema.schema_format == "date-time":
         converted_type = pre_type + "datetime" + post_type
         import_types = ["from datetime import datetime"]
+    elif schema.type == "string":
+        converted_type = pre_type + "str" + post_type
     elif schema.type == "integer":
         converted_type = pre_type + "int" + post_type
     elif schema.type == "number":
@@ -155,8 +162,15 @@ def type_converter(  # noqa: C901
             original_type = "array<" + converted_reference.type.original_type + ">"
             retVal += converted_reference.type.converted_type
         elif isinstance(schema.items, Schema):
-            original_type = "array<" + (
-                str(schema.items.type.value) if schema.items.type is not None else "unknown") + ">"
+            original_type = (
+                "array<"
+                + (
+                    str(schema.items.type.value)
+                    if schema.items.type is not None
+                    else "unknown"
+                )
+                + ">"
+            )
             retVal += type_converter(schema.items, True).converted_type
         else:
             original_type = "array<unknown>"
@@ -180,7 +194,7 @@ def type_converter(  # noqa: C901
 
 
 def _generate_property_from_schema(
-        model_name: str, name: str, schema: Schema, parent_schema: Optional[Schema] = None
+    model_name: str, name: str, schema: Schema, parent_schema: Optional[Schema] = None
 ) -> Property:
     """
     Generates a property from a schema. It takes the type of the schema and converts it to a python type, and then
@@ -192,9 +206,9 @@ def _generate_property_from_schema(
     :return: Property
     """
     required = (
-            parent_schema is not None
-            and parent_schema.required is not None
-            and name in parent_schema.required
+        parent_schema is not None
+        and parent_schema.required is not None
+        and name in parent_schema.required
     )
 
     import_type = None
@@ -211,11 +225,11 @@ def _generate_property_from_schema(
 
 
 def _generate_property_from_reference(
-        model_name: str,
-        name: str,
-        reference: Reference,
-        parent_schema: Optional[Schema] = None,
-        force_required: bool = False,
+    model_name: str,
+    name: str,
+    reference: Reference,
+    parent_schema: Optional[Schema] = None,
+    force_required: bool = False,
 ) -> Property:
     """
     Generates a property from a reference. It takes the name of the reference as the type, and then
@@ -227,26 +241,26 @@ def _generate_property_from_reference(
     :return: Property and model to be imported by the file
     """
     required = (
-                       parent_schema is not None
-                       and parent_schema.required is not None
-                       and name in parent_schema.required
-               ) or force_required
+        parent_schema is not None
+        and parent_schema.required is not None
+        and name in parent_schema.required
+    ) or force_required
     import_model = common.normalize_symbol(reference.ref.split("/")[-1])
 
     if import_model == model_name:
         type_conv = TypeConversion(
             original_type=reference.ref,
-            converted_type=import_model
-            if required
-            else 'Optional["' + import_model + '"]',
+            converted_type=(
+                import_model if required else 'Optional["' + import_model + '"]'
+            ),
             import_types=None,
         )
     else:
         type_conv = TypeConversion(
             original_type=reference.ref,
-            converted_type=import_model
-            if required
-            else "Optional[" + import_model + "]",
+            converted_type=(
+                import_model if required else "Optional[" + import_model + "]"
+            ),
             import_types=[f"from .{import_model} import {import_model}"],
         )
     return Property(
@@ -258,7 +272,9 @@ def _generate_property_from_reference(
     )
 
 
-def generate_models(components: Components, pydantic_version: PydanticVersion = PydanticVersion.V2) -> List[Model]:
+def generate_models(
+    components: Components, pydantic_version: PydanticVersion = PydanticVersion.V2
+) -> List[Model]:
     """
     Receives components from an OpenAPI 3.0 specification and generates the models from it.
     It does so, by iterating over the components.schemas dictionary. For each schema, it checks if
@@ -316,7 +332,11 @@ def generate_models(components: Components, pydantic_version: PydanticVersion = 
                 )
             properties.append(conv_property)
 
-        template_name = MODELS_TEMPLATE_PYDANTIC_V2 if pydantic_version == PydanticVersion.V2 else MODELS_TEMPLATE
+        template_name = (
+            MODELS_TEMPLATE_PYDANTIC_V2
+            if pydantic_version == PydanticVersion.V2
+            else MODELS_TEMPLATE
+        )
 
         generated_content = jinja_env.get_template(template_name).render(
             schema_name=name, schema=schema_or_reference, properties=properties
