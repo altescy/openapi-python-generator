@@ -6,7 +6,7 @@
     _headers: httpx._types.HeaderTypes = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': f'Bearer { api_config.get_access_token() }',
+        'Authorization': f'Bearer { _api_config.get_access_token() }',
         {{ header_params | join(',\n') | safe }}
     }
     _query_params : Dict[str,Any] = {
@@ -15,7 +15,7 @@
     {% endif %}
     }
 
-    _query_params = {key:value for (key,value) in query_params.items() if value is not None}
+    _query_params = {key:value for (key,value) in _query_params.items() if value is not None}
 
     {% if async_client %}
 async with httpx.AsyncClient(base_url=_base_path, verify=_api_config.verify) as _client:
@@ -25,7 +25,7 @@ with httpx.Client(base_url=_base_path, verify=_api_config.verify) as _client:
         response = _client.request(
     {% endif %}
         '{{ method }}',
-        httpx.URL(path),
+        httpx.URL(_path),
         headers=_headers,
         params=_query_params,
         {% if body_param %}
