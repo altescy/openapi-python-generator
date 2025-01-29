@@ -49,5 +49,5 @@ with httpx.Client(base_url=_base_path, verify=_api_config.verify) as _client:
     return [{{ return_type.list_type }}(**item) for item in response.json()]
     {%- endif %}
 {% else %}
-    return response.json()
+    return cast({{ return_type.type.converted_type }}, response.json())
 {% endif %}
