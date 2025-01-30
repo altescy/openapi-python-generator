@@ -168,7 +168,7 @@ def type_converter(  # noqa: C901
         retVal = pre_type + "List["
         if isinstance(schema.items, Reference):
             converted_reference = _generate_property_from_reference(
-                model_name, "", schema.items, schema, required
+                model_name, "", schema.items, schema, True
             )
             import_types = converted_reference.type.import_types
             original_type = "array<" + converted_reference.type.original_type + ">"
