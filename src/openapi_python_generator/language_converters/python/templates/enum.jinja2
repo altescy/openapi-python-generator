@@ -7,3 +7,6 @@ class {{ name }}(str, Enum):
     {{ enumItem.upper() }} = '{{ enumItem }}'{% else %}
     value_{{ enumItem }} = {{ enumItem }}{% endif %}
     {% endfor %}
+
+    def __str__(self) -> str:
+        return self.value
