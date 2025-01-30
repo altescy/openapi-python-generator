@@ -49,11 +49,21 @@ def type_converter(  # noqa: C901
     original_type = schema.type.value if schema.type is not None else "object"
     import_types: Optional[List[str]] = None
 
+    def _update_import_types(type_conv: TypeConversion) -> TypeConversion:
+        nonlocal import_types
+        if type_conv.import_types is not None:
+            if import_types is None:
+                import_types = type_conv.import_types
+            import_types.extend(type_conv.import_types)
+        return type_conv
+
     if schema.allOf is not None:
         conversions = []
         for sub_schema in schema.allOf:
             if isinstance(sub_schema, Schema):
-                conversions.append(type_converter(sub_schema, True))
+                conversions.append(
+                    _update_import_types(type_converter(sub_schema, True))
+                )
             else:
                 import_type = common.normalize_symbol(sub_schema.ref.split("/")[-1])
                 if import_type == model_name:
@@ -95,7 +105,9 @@ def type_converter(  # noqa: C901
         conversions = []
         for sub_schema in used:
             if isinstance(sub_schema, Schema):
-                conversions.append(type_converter(sub_schema, True))
+                conversions.append(
+                    _update_import_types(type_converter(sub_schema, True))
+                )
             else:
                 import_type = common.normalize_symbol(sub_schema.ref.split("/")[-1])
                 import_types = [f"from .{import_type} import {import_type}"]
@@ -171,7 +183,9 @@ def type_converter(  # noqa: C901
                 )
                 + ">"
             )
-            retVal += type_converter(schema.items, True).converted_type
+            retVal += _update_import_types(
+                type_converter(schema.items, True)
+            ).converted_type
         else:
             original_type = "array<unknown>"
             retVal += "Any"
@@ -189,7 +203,7 @@ def type_converter(  # noqa: C901
     return TypeConversion(
         original_type=original_type,
         converted_type=converted_type,
-        import_types=import_types,
+        import_types=list(set(import_types)) if import_types else None,
     )
 
 
@@ -215,12 +229,19 @@ def _generate_property_from_schema(
     if required:
         import_type = [] if name == model_name else [name]
 
+    type_conv = type_converter(schema, required, model_name)
+    if type_conv.import_types is not None:
+        if import_type is None:
+            import_type = type_conv.import_types
+        else:
+            import_type.extend(type_conv.import_types)
+
     return Property(
         name=name,
-        type=type_converter(schema, required, model_name),
+        type=type_conv,
         required=required,
         default=None if required else "None",
-        import_type=import_type,
+        import_type=list(set(import_type)) if import_type else None,
     )
 
 
