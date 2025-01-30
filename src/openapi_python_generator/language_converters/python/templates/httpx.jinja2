@@ -16,6 +16,7 @@
     }
 
     _query_params = {key:value for (key,value) in _query_params.items() if value is not None}
+    _query_params = {key:value.value if isinstance(value, Enum) else value for (key, value) in _query_params.items()}
 
     {% if async_client %}
 async with httpx.AsyncClient(base_url=_base_path, verify=_api_config.verify) as _client:
