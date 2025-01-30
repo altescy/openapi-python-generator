@@ -344,7 +344,7 @@ def generate_services(
     for tag in tags:
         services.append(
             Service(
-                file_name=f"{tag}_service",
+                file_name=f"{tag}_service" if tag else "service",
                 operations=[
                     so for so in service_ops if so.tag == tag and not so.async_client
                 ],
@@ -364,7 +364,7 @@ def generate_services(
     for tag in tags:
         services.append(
             Service(
-                file_name=f"async_{tag}_service",
+                file_name=f"async_{tag}_service" if tag else "async_service",
                 operations=[
                     so for so in service_ops if so.tag == tag and so.async_client
                 ],
