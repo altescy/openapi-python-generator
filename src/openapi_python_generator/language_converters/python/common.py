@@ -58,8 +58,8 @@ def normalize_symbol(symbol: str) -> str:
 
 
 def safe_property_name(name: str) -> str:
-    return re.sub(
-        r"^(\d.*)",
-        r"var_\1",
-        name.replace("@", "").replace("-", "_"),
-    )
+    name = name.replace("@", "")
+    name = name.replace("-", "_")
+    name = re.sub(r"^(\d.*)", r"var_\1", name)
+    name = re.sub(r"^_+", "", name)
+    return name
