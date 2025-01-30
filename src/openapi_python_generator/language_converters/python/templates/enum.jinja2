@@ -8,5 +8,6 @@ class {{ name }}(str, Enum):
     value_{{ enumItem }} = {{ enumItem }}{% endif %}
     {% endfor %}
 
+    {% if enumItem is string %}
     def __str__(self) -> str:
-        return self.value
+        return self.value{% endif %}
