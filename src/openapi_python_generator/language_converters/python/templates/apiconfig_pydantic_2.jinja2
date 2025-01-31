@@ -10,6 +10,8 @@ class APIConfig(BaseModel):
 
     base_path: str = {% if servers|length > 0 %} '{{ servers[0].url }}' {% else %} 'NO SERVER' {% endif %}
 
+    timeout: Optional[int] = None
+
     verify: Union[bool, str] = True
 {% if env_token_name is none %}
     access_token : Optional[str] = None

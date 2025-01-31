@@ -18,7 +18,10 @@ async def {{ operation_id }}({{ params }} api_config_override : Optional[APIConf
 
     query_params = {key:value for (key,value) in query_params.items() if value is not None}
 
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(
+        headers=headers,
+        timeout=None if api_config.timeout is None else aiohttp.ClientTimeout(total=api_config.timeout),
+    ) as session:
         async with session.request(
             '{{ method }}',
             base_path + path,

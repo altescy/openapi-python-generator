@@ -19,10 +19,10 @@
     _query_params = {key:value.value if isinstance(value, Enum) else value for (key, value) in _query_params.items()}
 
     {% if async_client %}
-async with httpx.AsyncClient(base_url=_base_path, verify=_api_config.verify) as _client:
+async with httpx.AsyncClient(base_url=_base_path, timeout=_api_config.timeout, verify=_api_config.verify) as _client:
         response = await _client.request(
     {% else %}
-with httpx.Client(base_url=_base_path, verify=_api_config.verify) as _client:
+with httpx.Client(base_url=_base_path, timeout=_api_config.timeout, verify=_api_config.verify) as _client:
         response = _client.request(
     {% endif %}
         '{{ method }}',

@@ -22,6 +22,7 @@ def {{ operation_id }}({{ params }} api_config_override : Optional[APIConfig] = 
         f'{base_path}{path}',
         headers=headers,
         params=query_params,
+        timeout=api_config.timeout,
         verify=api_config.verify,
         {% if body_param %}
         {% if use_orjson %}
